@@ -9,7 +9,199 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      agendamentos: {
+        Row: {
+          created_at: string
+          data: string
+          disciplina: string
+          horario: string
+          id: string
+          laboratorio_id: string
+          observacoes: string | null
+          professor: string
+          status: string
+          turma: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data: string
+          disciplina: string
+          horario: string
+          id?: string
+          laboratorio_id: string
+          observacoes?: string | null
+          professor: string
+          status?: string
+          turma: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          disciplina?: string
+          horario?: string
+          id?: string
+          laboratorio_id?: string
+          observacoes?: string | null
+          professor?: string
+          status?: string
+          turma?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendamentos_laboratorio_id_fkey"
+            columns: ["laboratorio_id"]
+            isOneToOne: false
+            referencedRelation: "laboratorios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      laboratorios: {
+        Row: {
+          ativo: boolean
+          capacidade: number
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          capacidade?: number
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          capacidade?: number
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      materiais: {
+        Row: {
+          categoria: string
+          created_at: string
+          estoque: number
+          id: string
+          localizacao: string
+          minimo: number
+          nome: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          categoria: string
+          created_at?: string
+          estoque?: number
+          id?: string
+          localizacao: string
+          minimo?: number
+          nome: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          estoque?: number
+          id?: string
+          localizacao?: string
+          minimo?: number
+          nome?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      movimentacoes_materiais: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          observacoes: string | null
+          quantidade: number
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          observacoes?: string | null
+          quantidade: number
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          observacoes?: string | null
+          quantidade?: number
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movimentacoes_materiais_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materiais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          departamento: string | null
+          email: string
+          id: string
+          name: string
+          role: string
+          status: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          departamento?: string | null
+          email: string
+          id: string
+          name: string
+          role: string
+          status?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          departamento?: string | null
+          email?: string
+          id?: string
+          name?: string
+          role?: string
+          status?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

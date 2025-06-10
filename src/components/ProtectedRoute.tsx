@@ -1,37 +1,50 @@
 
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: ('admin' | 'coordenacao' | 'professor')[];
+  allowedRoles?: string[];
   requireAdminOrCoord?: boolean;
 }
 
-export const ProtectedRoute = ({ children, allowedRoles, requireAdminOrCoord }: ProtectedRouteProps) => {
-  const { user, isLoading } = useAuth();
+export const ProtectedRoute = ({ 
+  children, 
+  allowedRoles,
+  requireAdminOrCoord = false 
+}: ProtectedRouteProps) => {
+  const { user, session, isLoading } = useAuth();
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!isLoading && !session) {
+      navigate('/login');
+    }
+  }, [session, isLoading, navigate]);
+
+  // Show loading spinner while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  // If not authenticated, don't render anything (will redirect)
+  if (!session || !user) {
+    return null;
   }
 
-  // Se requireAdminOrCoord for true, apenas admin e coordenacao podem acessar
+  // Check role-based access
   if (requireAdminOrCoord && !['admin', 'coordenacao'].includes(user.role)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Acesso Negado</h1>
           <p className="text-gray-600">Você não tem permissão para acessar esta página.</p>
-          <p className="text-sm text-gray-500 mt-2">Apenas administradores e coordenadores podem acessar esta funcionalidade.</p>
         </div>
       </div>
     );
