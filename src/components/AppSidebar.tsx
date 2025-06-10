@@ -12,38 +12,49 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const menuItems = [
   {
     title: "Dashboard",
     url: "/",
     icon: BarChart3,
+    roles: ['admin', 'coordenacao', 'professor'],
   },
   {
     title: "Agendamentos",
     url: "/agendamentos",
     icon: Calendar,
+    roles: ['admin', 'coordenacao', 'professor'],
   },
   {
     title: "Materiais",
     url: "/materiais",
     icon: FlaskConical,
+    roles: ['admin', 'coordenacao', 'professor'],
   },
   {
     title: "Professores",
     url: "/professores",
     icon: Users,
+    roles: ['admin', 'coordenacao'], // Apenas admin e coordenacao
   },
   {
     title: "Relatórios",
     url: "/relatorios",
     icon: BookOpen,
+    roles: ['admin', 'coordenacao'], // Apenas admin e coordenacao
   },
 ];
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+
+  const filteredMenuItems = menuItems.filter(item => 
+    user && item.roles.includes(user.role)
+  );
 
   return (
     <Sidebar className="border-r border-blue-200">
@@ -65,7 +76,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {filteredMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild

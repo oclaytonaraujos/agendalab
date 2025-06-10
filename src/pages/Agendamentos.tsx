@@ -52,7 +52,8 @@ const Agendamentos = () => {
     }
   };
 
-  const canCreateAgendamento = user?.role === 'professor' || user?.role === 'coordenacao' || user?.role === 'admin';
+  const canManageAgendamentos = user?.role === 'admin' || user?.role === 'coordenacao';
+  const canCreateAgendamento = true; // Todos podem criar agendamentos
 
   return (
     <div className="space-y-6">
@@ -112,12 +113,18 @@ const Agendamentos = () => {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          Editar
-                        </Button>
-                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                          Cancelar
-                        </Button>
+                        {/* Professores podem apenas editar seus próprios agendamentos */}
+                        {(canManageAgendamentos || (user?.role === 'professor' && agendamento.professor.includes(user.name))) && (
+                          <Button variant="outline" size="sm">
+                            Editar
+                          </Button>
+                        )}
+                        {/* Apenas admin e coordenacao podem cancelar qualquer agendamento */}
+                        {canManageAgendamentos && (
+                          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                            Cancelar
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -162,27 +169,29 @@ const Agendamentos = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Estatísticas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Agendamentos hoje:</span>
-                  <span className="font-semibold">8</span>
+          {canManageAgendamentos && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Estatísticas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Agendamentos hoje:</span>
+                    <span className="font-semibold">8</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Taxa de ocupação:</span>
+                    <span className="font-semibold text-green-600">75%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Professor mais ativo:</span>
+                    <span className="font-semibold">Prof. Maria Silva</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Taxa de ocupação:</span>
-                  <span className="font-semibold text-green-600">75%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Professor mais ativo:</span>
-                  <span className="font-semibold">Prof. Maria Silva</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

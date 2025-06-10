@@ -72,7 +72,7 @@ const App = () => (
             <Route 
               path="/professores" 
               element={
-                <ProtectedRoute allowedRoles={['admin', 'coordenacao']}>
+                <ProtectedRoute requireAdminOrCoord={true}>
                   <Layout>
                     <Professores />
                   </Layout>
@@ -82,7 +82,7 @@ const App = () => (
             <Route 
               path="/relatorios" 
               element={
-                <ProtectedRoute allowedRoles={['admin', 'coordenacao']}>
+                <ProtectedRoute requireAdminOrCoord={true}>
                   <Layout>
                     <Relatorios />
                   </Layout>

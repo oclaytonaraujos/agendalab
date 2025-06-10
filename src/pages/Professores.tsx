@@ -1,5 +1,5 @@
 
-import { Users, Mail, Shield, Search, Plus, Edit, Trash2 } from "lucide-react";
+import { Users, Mail, Shield, Search, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +13,25 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { NovoUsuarioModal } from "@/components/NovoUsuarioModal";
+import { EditarUsuarioModal } from "@/components/EditarUsuarioModal";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const Professores = () => {
-  const professores = [
+  const { toast } = useToast();
+  const [professores, setProfessores] = useState([
     {
       id: 1,
       nome: "Prof. João Silva",
@@ -56,7 +72,32 @@ const Professores = () => {
       status: "ativo",
       ultimoAcesso: "Hoje às 09:15"
     },
-  ];
+  ]);
+
+  const handleAddUsuario = (novoUsuario: any) => {
+    const id = Math.max(...professores.map(p => p.id)) + 1;
+    const usuario = {
+      ...novoUsuario,
+      id,
+      status: "ativo",
+      ultimoAcesso: "Nunca"
+    };
+    setProfessores([...professores, usuario]);
+  };
+
+  const handleUpdateUsuario = (id: number, dadosAtualizados: any) => {
+    setProfessores(professores.map(prof => 
+      prof.id === id ? { ...prof, ...dadosAtualizados } : prof
+    ));
+  };
+
+  const handleDeleteUsuario = (id: number, nome: string) => {
+    setProfessores(professores.filter(prof => prof.id !== id));
+    toast({
+      title: "Usuário removido",
+      description: `${nome} foi removido do sistema.`,
+    });
+  };
 
   const getRoleDisplay = (role: string) => {
     switch (role) {
@@ -98,10 +139,7 @@ const Professores = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Professor
-        </Button>
+        <NovoUsuarioModal onAdd={handleAddUsuario} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -173,7 +211,7 @@ const Professores = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5 text-blue-600" />
-            Lista de Professores e Usuários
+            Gerenciamento de Usuários
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -219,12 +257,34 @@ const Professores = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <EditarUsuarioModal 
+                        usuario={professor} 
+                        onUpdate={handleUpdateUsuario}
+                      />
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja excluir o usuário "{professor.nome}"? Esta ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => handleDeleteUsuario(professor.id, professor.nome)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>
