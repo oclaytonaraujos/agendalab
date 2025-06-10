@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -26,15 +26,38 @@ interface AgendamentoForm {
 
 interface NovoAgendamentoModalProps {
   onAgendamentoCreated?: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  preSelectedDate?: Date;
+  preSelectedHorario?: string | null;
 }
 
-export const NovoAgendamentoModal = ({ onAgendamentoCreated }: NovoAgendamentoModalProps) => {
-  const [open, setOpen] = useState(false);
+export const NovoAgendamentoModal = ({ 
+  onAgendamentoCreated, 
+  open: controlledOpen, 
+  onOpenChange: controlledOnOpenChange,
+  preSelectedDate,
+  preSelectedHorario
+}: NovoAgendamentoModalProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [date, setDate] = useState<Date>();
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<AgendamentoForm>();
   const { toast } = useToast();
   const { user } = useAuth();
   const { horariosLivres } = useHorarios(date);
+
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const onOpenChange = controlledOnOpenChange || setInternalOpen;
+
+  // Efeito para pré-selecionar data e horário quando props são fornecidas
+  useEffect(() => {
+    if (preSelectedDate) {
+      setDate(preSelectedDate);
+    }
+    if (preSelectedHorario) {
+      setValue('horario', preSelectedHorario);
+    }
+  }, [preSelectedDate, preSelectedHorario, setValue]);
 
   const onSubmit = async (data: AgendamentoForm) => {
     if (!date) {
@@ -56,20 +79,31 @@ export const NovoAgendamentoModal = ({ onAgendamentoCreated }: NovoAgendamentoMo
       description: `Laboratório reservado para ${format(date, "dd/MM/yyyy", { locale: ptBR })} às ${data.horario}`,
     });
 
-    setOpen(false);
+    onOpenChange(false);
     reset();
     setDate(undefined);
     onAgendamentoCreated?.();
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    onOpenChange(newOpen);
+    if (!newOpen) {
+      // Reset form when closing
+      reset();
+      setDate(undefined);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Agendamento
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {!controlledOpen && (
+        <DialogTrigger asChild>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Agendamento
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Novo Agendamento</DialogTitle>
@@ -127,7 +161,10 @@ export const NovoAgendamentoModal = ({ onAgendamentoCreated }: NovoAgendamentoMo
                 </div>
               </div>
             ) : (
-              <Select onValueChange={(value) => setValue('horario', value)}>
+              <Select 
+                onValueChange={(value) => setValue('horario', value)}
+                defaultValue={preSelectedHorario || undefined}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um horário disponível" />
                 </SelectTrigger>
@@ -175,7 +212,7 @@ export const NovoAgendamentoModal = ({ onAgendamentoCreated }: NovoAgendamentoMo
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancelar
             </Button>
             <Button 

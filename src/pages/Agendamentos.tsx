@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Calendar, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -82,6 +81,8 @@ const Agendamentos = () => {
 
   const [agendamentoParaEditar, setAgendamentoParaEditar] = useState<Agendamento | null>(null);
   const [modalEditarAberto, setModalEditarAberto] = useState(false);
+  const [modalNovoAberto, setModalNovoAberto] = useState(false);
+  const [horarioPreSelecionado, setHorarioPreSelecionado] = useState<string | null>(null);
 
   // Filtrar agendamentos pela data selecionada
   const agendamentosFiltrados = agendamentos.filter(agendamento => {
@@ -109,6 +110,11 @@ const Agendamentos = () => {
   const handleEditarAgendamento = (agendamento: Agendamento) => {
     setAgendamentoParaEditar(agendamento);
     setModalEditarAberto(true);
+  };
+
+  const handleClickHorarioDisponivel = (horario: string) => {
+    setHorarioPreSelecionado(horario);
+    setModalNovoAberto(true);
   };
 
   const createNotificationForAdmins = (message: string, agendamento: Agendamento) => {
@@ -164,6 +170,8 @@ const Agendamentos = () => {
     if (novoAgendamento) {
       setAgendamentos(prev => [...prev, novoAgendamento]);
     }
+    setModalNovoAberto(false);
+    setHorarioPreSelecionado(null);
     console.log("Novo agendamento criado - atualizando lista");
   };
 
@@ -202,7 +210,15 @@ const Agendamentos = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        {canCreateAgendamento && <NovoAgendamentoModal onAgendamentoCreated={onAgendamentoCreated} />}
+        {canCreateAgendamento && (
+          <NovoAgendamentoModal 
+            open={modalNovoAberto}
+            onOpenChange={setModalNovoAberto}
+            onAgendamentoCreated={onAgendamentoCreated}
+            preSelectedDate={selectedDate}
+            preSelectedHorario={horarioPreSelecionado}
+          />
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
@@ -332,11 +348,12 @@ const Agendamentos = () => {
                 {horariosDisponiveis.map((slot, index) => (
                   <div
                     key={index}
-                    className={`p-3 rounded-lg border ${
+                    className={`p-3 rounded-lg border transition-all ${
                       slot.disponivel
-                        ? "bg-green-50 border-green-200 text-green-800"
+                        ? "bg-green-50 border-green-200 text-green-800 hover:bg-green-100 cursor-pointer"
                         : "bg-red-50 border-red-200 text-red-800"
                     }`}
+                    onClick={() => slot.disponivel && handleClickHorarioDisponivel(slot.horario)}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{slot.horario}</span>
@@ -347,6 +364,11 @@ const Agendamentos = () => {
                     {!slot.disponivel && slot.agendadoPor && (
                       <div className="text-xs mt-1 opacity-75">
                         {slot.agendadoPor}
+                      </div>
+                    )}
+                    {slot.disponivel && (
+                      <div className="text-xs mt-1 opacity-75">
+                        Clique para agendar
                       </div>
                     )}
                   </div>
