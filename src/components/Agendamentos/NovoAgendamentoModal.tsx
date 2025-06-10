@@ -111,7 +111,7 @@ export const NovoAgendamentoModal = ({ onAgendamentoCreated }: NovoAgendamentoMo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="horario">Horário</Label>
+            <Label htmlFor="horario">Horário Disponível</Label>
             {!date ? (
               <div className="p-3 border border-gray-200 rounded-md bg-gray-50">
                 <div className="flex items-center gap-2 text-gray-500">
@@ -129,12 +129,15 @@ export const NovoAgendamentoModal = ({ onAgendamentoCreated }: NovoAgendamentoMo
             ) : (
               <Select onValueChange={(value) => setValue('horario', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um horário" />
+                  <SelectValue placeholder="Selecione um horário disponível" />
                 </SelectTrigger>
                 <SelectContent>
                   {horariosLivres.map((slot) => (
                     <SelectItem key={slot.horario} value={slot.horario}>
-                      {slot.horario}
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-green-600" />
+                        {slot.horario}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
