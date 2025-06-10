@@ -10,7 +10,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; redirectTo?: string }>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; redirectTo?: string }> => {
     setIsLoading(true);
     // Simular delay de API
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -47,10 +47,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(foundUser);
       localStorage.setItem('user', JSON.stringify(foundUser));
       setIsLoading(false);
-      return true;
+      
+      // Redirecionar professores para agendamentos, outros para dashboard
+      const redirectTo = foundUser.role === 'professor' ? '/agendamentos' : '/';
+      return { success: true, redirectTo };
     }
     setIsLoading(false);
-    return false;
+    return { success: false };
   };
 
   const logout = () => {

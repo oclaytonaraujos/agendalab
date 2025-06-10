@@ -10,10 +10,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { CalendarIcon, Plus } from 'lucide-react';
+import { CalendarIcon, Plus, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useHorarios } from '@/hooks/useHorarios';
 
 interface AgendamentoForm {
   data: Date;
@@ -22,20 +23,6 @@ interface AgendamentoForm {
   turma: string;
   observacoes?: string;
 }
-
-const horarios = [
-  '07:00 - 07:50',
-  '07:50 - 08:40',
-  '08:40 - 09:30',
-  '09:50 - 10:40',
-  '10:40 - 11:30',
-  '11:30 - 12:20',
-  '13:00 - 13:50',
-  '13:50 - 14:40',
-  '14:40 - 15:30',
-  '15:50 - 16:40',
-  '16:40 - 17:30',
-];
 
 interface NovoAgendamentoModalProps {
   onAgendamentoCreated?: () => void;
@@ -47,6 +34,7 @@ export const NovoAgendamentoModal = ({ onAgendamentoCreated }: NovoAgendamentoMo
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<AgendamentoForm>();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { horariosLivres } = useHorarios(date);
 
   const onSubmit = async (data: AgendamentoForm) => {
     if (!date) {
@@ -112,25 +100,45 @@ export const NovoAgendamentoModal = ({ onAgendamentoCreated }: NovoAgendamentoMo
                   onSelect={setDate}
                   initialFocus
                   disabled={(date) => date < new Date()}
+                  className="pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="horario">Horário</Label>
-            <Select onValueChange={(value) => setValue('horario', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o horário" />
-              </SelectTrigger>
-              <SelectContent>
-                {horarios.map((horario) => (
-                  <SelectItem key={horario} value={horario}>
-                    {horario}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="horario">Horário Disponível</Label>
+            {!date ? (
+              <div className="p-3 border border-gray-200 rounded-md bg-gray-50">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <Clock className="w-4 h-4" />
+                  <span className="text-sm">Selecione uma data primeiro</span>
+                </div>
+              </div>
+            ) : horariosLivres.length === 0 ? (
+              <div className="p-3 border border-red-200 rounded-md bg-red-50">
+                <div className="flex items-center gap-2 text-red-600">
+                  <Clock className="w-4 h-4" />
+                  <span className="text-sm">Nenhum horário disponível nesta data</span>
+                </div>
+              </div>
+            ) : (
+              <Select onValueChange={(value) => setValue('horario', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um horário disponível" />
+                </SelectTrigger>
+                <SelectContent>
+                  {horariosLivres.map((slot) => (
+                    <SelectItem key={slot.horario} value={slot.horario}>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-green-600" />
+                        {slot.horario}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -166,7 +174,11 @@ export const NovoAgendamentoModal = ({ onAgendamentoCreated }: NovoAgendamentoMo
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            <Button 
+              type="submit" 
+              className="bg-blue-600 hover:bg-blue-700"
+              disabled={!date || horariosLivres.length === 0}
+            >
               Agendar
             </Button>
           </div>

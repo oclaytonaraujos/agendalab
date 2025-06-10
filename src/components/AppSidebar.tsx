@@ -19,7 +19,7 @@ const menuItems = [
     title: "Dashboard",
     url: "/",
     icon: BarChart3,
-    roles: ['admin', 'coordenacao', 'professor'],
+    roles: ['admin', 'coordenacao'], // Apenas admin e coordenacao
   },
   {
     title: "Agendamentos",

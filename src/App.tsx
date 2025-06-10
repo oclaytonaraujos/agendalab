@@ -32,7 +32,7 @@ const App = () => (
             <Route 
               path="/" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['admin', 'coordenacao']}>
                   <Layout>
                     <Index />
                   </Layout>
@@ -42,7 +42,7 @@ const App = () => (
             <Route 
               path="/dashboard" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['admin', 'coordenacao']}>
                   <Layout>
                     <Dashboard />
                   </Layout>
