@@ -23,8 +23,6 @@ interface Agendamento {
 const Agendamentos = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const today = new Date();
-  const { horariosDisponiveis } = useHorarios(today, agendamentos);
 
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([
     {
@@ -55,6 +53,9 @@ const Agendamentos = () => {
       status: "confirmado",
     },
   ]);
+
+  const today = new Date();
+  const { horariosDisponiveis } = useHorarios(today, agendamentos);
 
   const [agendamentoParaEditar, setAgendamentoParaEditar] = useState<Agendamento | null>(null);
   const [modalEditarAberto, setModalEditarAberto] = useState(false);
