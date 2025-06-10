@@ -99,7 +99,11 @@ export const NovoAgendamentoModal = ({ onAgendamentoCreated }: NovoAgendamentoMo
                   selected={date}
                   onSelect={setDate}
                   initialFocus
-                  disabled={(date) => date < new Date()}
+                  disabled={(date) => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    return date < today;
+                  }}
                   className="pointer-events-auto"
                 />
               </PopoverContent>
