@@ -1,9 +1,9 @@
-
-import { FlaskConical, Plus, Search, Package, AlertTriangle, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FlaskConical, Search, Package, AlertTriangle, TrendingUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { NovoMaterialModal } from "@/components/Materiais/NovoMaterialModal";
 
 const Materiais = () => {
   const materiais = [
@@ -65,10 +65,7 @@ const Materiais = () => {
           <h1 className="text-3xl font-bold text-gray-900">Materiais</h1>
           <p className="text-gray-600">Controle de estoque e materiais do laboratório</p>
         </div>
-        <Button className="bg-green-600 hover:bg-green-700 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          Adicionar Material
-        </Button>
+        <NovoMaterialModal />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

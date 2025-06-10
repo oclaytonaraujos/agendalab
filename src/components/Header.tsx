@@ -11,8 +11,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Header = () => {
+  const { user, logout } = useAuth();
+
+  const getRoleDisplay = (role: string) => {
+    switch (role) {
+      case 'admin': return 'Administrador';
+      case 'coordenacao': return 'Coordenação';
+      case 'professor': return 'Professor';
+      default: return role;
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
   return (
     <header className="bg-white border-b border-blue-200 px-6 py-4 flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -34,14 +50,22 @@ export const Header = () => {
             <Button variant="ghost" className="flex items-center gap-2">
               <Avatar className="w-8 h-8">
                 <AvatarFallback className="bg-blue-600 text-white">
-                  AD
+                  {user ? getInitials(user.name) : 'U'}
                 </AvatarFallback>
               </Avatar>
-              <span className="hidden md:block">Admin</span>
+              <div className="hidden md:block text-left">
+                <span className="text-sm font-medium">{user?.name}</span>
+                <p className="text-xs text-gray-500">{user ? getRoleDisplay(user.role) : ''}</p>
+              </div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              <div>
+                <p className="font-medium">{user?.name}</p>
+                <p className="text-sm text-gray-500">{user?.email}</p>
+              </div>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
@@ -51,7 +75,10 @@ export const Header = () => {
               Configurações
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600">
+            <DropdownMenuItem 
+              className="text-red-600 cursor-pointer"
+              onClick={logout}
+            >
               Sair
             </DropdownMenuItem>
           </DropdownMenuContent>

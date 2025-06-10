@@ -1,10 +1,13 @@
-
-import { Calendar, Plus, Search, Filter } from "lucide-react";
+import { Calendar, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { NovoAgendamentoModal } from "@/components/Agendamentos/NovoAgendamentoModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Agendamentos = () => {
+  const { user } = useAuth();
+  
   const agendamentos = [
     {
       id: 1,
@@ -48,6 +51,8 @@ const Agendamentos = () => {
     }
   };
 
+  const canCreateAgendamento = user?.role === 'professor' || user?.role === 'coordenacao' || user?.role === 'admin';
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -55,10 +60,7 @@ const Agendamentos = () => {
           <h1 className="text-3xl font-bold text-gray-900">Agendamentos</h1>
           <p className="text-gray-600">Gerencie os agendamentos do laboratório</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Agendamento
-        </Button>
+        {canCreateAgendamento && <NovoAgendamentoModal />}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
