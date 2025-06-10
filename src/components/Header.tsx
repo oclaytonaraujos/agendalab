@@ -13,7 +13,12 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 
-export const Header = () => {
+interface HeaderProps {
+  title?: string;
+  description?: string;
+}
+
+export const Header = ({ title = "Dashboard", description = "Bem-vindo ao sistema de agendamento" }: HeaderProps) => {
   const { user, logout } = useAuth();
 
   const getRoleDisplay = (role: string) => {
@@ -34,8 +39,8 @@ export const Header = () => {
       <div className="flex items-center gap-4">
         <SidebarTrigger className="text-gray-600 hover:text-blue-600" />
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-          <p className="text-sm text-gray-600">Bem-vindo ao sistema de agendamento</p>
+          <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
+          <p className="text-sm text-gray-600">{description}</p>
         </div>
       </div>
       
