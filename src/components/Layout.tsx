@@ -21,7 +21,7 @@ export const Layout = ({ children }: LayoutProps) => {
       case '/materiais':
         return { title: "Materiais", description: "Controle de estoque e materiais do laboratório" };
       case '/professores':
-        return { title: "Professores", description: "Gestão de professores e usuários" };
+        return { title: "Usuários", description: "Gestão de usuários do sistema" };
       case '/relatorios':
         return { title: "Relatórios", description: "Relatórios e estatísticas do sistema" };
       case '/perfil':

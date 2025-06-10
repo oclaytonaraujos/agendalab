@@ -34,7 +34,7 @@ const menuItems = [
     roles: ['admin', 'coordenacao', 'professor'],
   },
   {
-    title: "Professores",
+    title: "Usuários",
     url: "/professores",
     icon: Users,
     roles: ['admin', 'coordenacao'], // Apenas admin e coordenacao
