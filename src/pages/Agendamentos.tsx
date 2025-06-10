@@ -1,5 +1,4 @@
 
-
 import { useState } from "react";
 import { Calendar, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -224,10 +223,38 @@ const Agendamentos = () => {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-blue-600" />
-                Lista de Agendamentos - {format(selectedDate, "dd/MM/yyyy")}
-              </CardTitle>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                  Lista de Agendamentos
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Data:</span>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[180px] justify-start text-left font-normal",
+                          !selectedDate && "text-muted-foreground"
+                        )}
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {selectedDate ? format(selectedDate, "dd/MM/yyyy") : <span>Selecionar data</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="end">
+                      <CalendarComponent
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date) => date && setSelectedDate(date)}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -295,32 +322,7 @@ const Agendamentos = () => {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg flex items-center justify-between">
-                <span>Horários Disponíveis</span>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[140px] justify-start text-left font-normal text-xs",
-                        !selectedDate && "text-muted-foreground"
-                      )}
-                    >
-                      <Calendar className="mr-2 h-3 w-3" />
-                      {selectedDate ? format(selectedDate, "dd/MM") : <span>Selecionar</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="end">
-                    <CalendarComponent
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={(date) => date && setSelectedDate(date)}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </CardTitle>
+              <CardTitle className="text-lg">Horários Disponíveis</CardTitle>
               <p className="text-sm text-muted-foreground">
                 {format(selectedDate, "dd/MM/yyyy")}
               </p>
@@ -392,4 +394,3 @@ const Agendamentos = () => {
 };
 
 export default Agendamentos;
-
