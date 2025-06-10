@@ -55,15 +55,35 @@ export const useNotifications = () => {
 
     // Adicionar notificações específicas para admin/coordenação
     if (user.role === 'admin' || user.role === 'coordenacao') {
-      mockNotifications.unshift({
-        id: '4',
-        title: 'Novo usuário cadastrado',
-        message: 'Um novo professor foi cadastrado no sistema',
-        type: 'info',
-        read: false,
-        createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutos atrás
-        relatedTo: { type: 'usuario', id: 'user1' }
-      });
+      mockNotifications.unshift(
+        {
+          id: '4',
+          title: 'Novo usuário cadastrado',
+          message: 'Um novo professor foi cadastrado no sistema',
+          type: 'info',
+          read: false,
+          createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutos atrás
+          relatedTo: { type: 'usuario', id: 'user1' }
+        },
+        {
+          id: '5',
+          title: 'Agendamento cancelado por professor',
+          message: 'Prof. Maria Silva cancelou seu agendamento de Química para hoje às 10:00',
+          type: 'warning',
+          read: false,
+          createdAt: new Date(Date.now() - 45 * 60 * 1000), // 45 minutos atrás
+          relatedTo: { type: 'agendamento', id: 'ag3' }
+        },
+        {
+          id: '6',
+          title: 'Agendamento editado por professor',
+          message: 'Prof. João Santos alterou seu agendamento de Física para amanhã às 14:00',
+          type: 'info',
+          read: false,
+          createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hora atrás
+          relatedTo: { type: 'agendamento', id: 'ag4' }
+        }
+      );
     }
 
     setNotifications(mockNotifications);
@@ -91,11 +111,21 @@ export const useNotifications = () => {
     );
   };
 
+  const addNotification = (notification: Omit<Notification, 'id' | 'createdAt'>) => {
+    const newNotification: Notification = {
+      ...notification,
+      id: Date.now().toString(),
+      createdAt: new Date()
+    };
+    setNotifications(prev => [newNotification, ...prev]);
+  };
+
   return {
     notifications,
     unreadCount,
     markAsRead,
     markAllAsRead,
-    deleteNotification
+    deleteNotification,
+    addNotification
   };
 };

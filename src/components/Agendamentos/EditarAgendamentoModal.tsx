@@ -38,7 +38,7 @@ interface EditarAgendamentoModalProps {
   agendamento: Agendamento | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAgendamentoUpdated?: () => void;
+  onAgendamentoUpdated?: (agendamento?: Agendamento) => void;
 }
 
 export const EditarAgendamentoModal = ({ 
@@ -76,11 +76,16 @@ export const EditarAgendamentoModal = ({
     // Simular atualização do agendamento
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    console.log('Agendamento atualizado:', { 
-      id: agendamento.id,
-      ...data, 
-      data: date 
-    });
+    const updatedAgendamento: Agendamento = {
+      ...agendamento,
+      data: date.toISOString().split('T')[0],
+      horario: data.horario,
+      disciplina: data.disciplina,
+      turma: data.turma,
+      observacoes: data.observacoes
+    };
+    
+    console.log('Agendamento atualizado:', updatedAgendamento);
     
     toast({
       title: "Agendamento atualizado!",
@@ -90,7 +95,7 @@ export const EditarAgendamentoModal = ({
     onOpenChange(false);
     reset();
     setDate(undefined);
-    onAgendamentoUpdated?.();
+    onAgendamentoUpdated?.(updatedAgendamento);
   };
 
   const handleCancel = () => {

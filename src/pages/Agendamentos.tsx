@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Calendar, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,32 @@ const Agendamentos = () => {
   const [agendamentoParaEditar, setAgendamentoParaEditar] = useState<Agendamento | null>(null);
   const [modalEditarAberto, setModalEditarAberto] = useState(false);
 
+  // Calcular horários disponíveis baseado nos agendamentos não cancelados
+  const getHorariosDisponiveis = () => {
+    const todosHorarios = [
+      "06:30 - 08:10",
+      "08:00 - 09:40",
+      "10:00 - 11:40",
+      "13:00 - 14:40",
+      "14:00 - 15:40",
+      "16:00 - 17:40",
+    ];
+
+    const today = new Date().toISOString().split('T')[0];
+    const agendamentosHoje = agendamentos.filter(
+      ag => ag.data === today && ag.status !== 'cancelado'
+    );
+
+    return todosHorarios.map(horario => {
+      const ocupado = agendamentosHoje.find(ag => ag.horario === horario);
+      return {
+        horario,
+        disponivel: !ocupado,
+        agendadoPor: ocupado?.professor
+      };
+    });
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "confirmado":
@@ -69,17 +96,36 @@ const Agendamentos = () => {
   };
 
   const canManageAgendamentos = user?.role === 'admin' || user?.role === 'coordenacao';
-  const canCreateAgendamento = true; // Todos podem criar agendamentos
+  const canCreateAgendamento = true;
 
   const handleEditarAgendamento = (agendamento: Agendamento) => {
     setAgendamentoParaEditar(agendamento);
     setModalEditarAberto(true);
   };
 
-  const handleCancelarAgendamento = async (agendamento: Agendamento) => {
-    if (!canManageAgendamentos) return;
+  const createNotificationForAdmins = (message: string, agendamento: Agendamento) => {
+    // Simular criação de notificação para admin/coordenação
+    console.log(`Notificação criada para admin/coordenação: ${message}`, agendamento);
+    
+    if (user?.role === 'professor') {
+      toast({
+        title: "Notificação enviada",
+        description: "A coordenação foi notificada sobre esta alteração.",
+      });
+    }
+  };
 
-    if (window.confirm(`Tem certeza que deseja cancelar o agendamento de ${agendamento.professor}?`)) {
+  const handleCancelarAgendamento = async (agendamento: Agendamento) => {
+    const isProfessor = user?.role === 'professor';
+    const isOwnAgendamento = isProfessor && agendamento.professor.includes(user.name);
+    
+    if (!canManageAgendamentos && !isOwnAgendamento) return;
+
+    const confirmMessage = isProfessor 
+      ? `Tem certeza que deseja cancelar seu agendamento para ${agendamento.disciplina}?`
+      : `Tem certeza que deseja cancelar o agendamento de ${agendamento.professor}?`;
+
+    if (window.confirm(confirmMessage)) {
       // Simular cancelamento
       await new Promise(resolve => setTimeout(resolve, 500));
       
@@ -91,21 +137,45 @@ const Agendamentos = () => {
         )
       );
 
+      // Se for professor cancelando próprio agendamento, notificar admin/coordenação
+      if (isProfessor && isOwnAgendamento) {
+        createNotificationForAdmins(
+          `Professor ${user.name} cancelou agendamento de ${agendamento.disciplina} para ${new Date(agendamento.data).toLocaleDateString()} às ${agendamento.horario}`,
+          agendamento
+        );
+      }
+
       toast({
         title: "Agendamento cancelado",
-        description: `O agendamento de ${agendamento.professor} foi cancelado com sucesso.`,
+        description: `O agendamento ${isProfessor ? 'foi' : `de ${agendamento.professor} foi`} cancelado com sucesso.`,
       });
     }
   };
 
   const onAgendamentoCreated = () => {
-    // Atualizar lista de agendamentos
     console.log("Novo agendamento criado - atualizando lista");
   };
 
-  const onAgendamentoUpdated = () => {
-    // Atualizar lista de agendamentos
+  const onAgendamentoUpdated = (updatedAgendamento?: Agendamento) => {
+    if (updatedAgendamento && user?.role === 'professor') {
+      createNotificationForAdmins(
+        `Professor ${user.name} editou agendamento de ${updatedAgendamento.disciplina} para ${new Date(updatedAgendamento.data).toLocaleDateString()} às ${updatedAgendamento.horario}`,
+        updatedAgendamento
+      );
+    }
     console.log("Agendamento atualizado - atualizando lista");
+  };
+
+  const canEditAgendamento = (agendamento: Agendamento) => {
+    if (canManageAgendamentos) return true;
+    if (user?.role === 'professor' && agendamento.professor.includes(user.name)) return true;
+    return false;
+  };
+
+  const canCancelAgendamento = (agendamento: Agendamento) => {
+    if (canManageAgendamentos) return true;
+    if (user?.role === 'professor' && agendamento.professor.includes(user.name)) return true;
+    return false;
   };
 
   return (
@@ -166,9 +236,7 @@ const Agendamentos = () => {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        {/* Professores podem apenas editar seus próprios agendamentos */}
-                        {(canManageAgendamentos || (user?.role === 'professor' && agendamento.professor.includes(user.name))) && 
-                         agendamento.status !== 'cancelado' && (
+                        {canEditAgendamento(agendamento) && agendamento.status !== 'cancelado' && (
                           <Button 
                             variant="outline" 
                             size="sm"
@@ -177,8 +245,7 @@ const Agendamentos = () => {
                             Editar
                           </Button>
                         )}
-                        {/* Apenas admin e coordenacao podem cancelar qualquer agendamento */}
-                        {canManageAgendamentos && agendamento.status !== 'cancelado' && (
+                        {canCancelAgendamento(agendamento) && agendamento.status !== 'cancelado' && (
                           <Button 
                             variant="outline" 
                             size="sm" 
@@ -204,14 +271,7 @@ const Agendamentos = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {[
-                  { horario: "06:30 - 08:10", disponivel: true },
-                  { horario: "08:00 - 09:40", disponivel: false },
-                  { horario: "10:00 - 11:40", disponivel: false },
-                  { horario: "13:00 - 14:40", disponivel: true },
-                  { horario: "14:00 - 15:40", disponivel: false },
-                  { horario: "16:00 - 17:40", disponivel: true },
-                ].map((slot, index) => (
+                {getHorariosDisponiveis().map((slot, index) => (
                   <div
                     key={index}
                     className={`p-3 rounded-lg border ${
@@ -226,6 +286,11 @@ const Agendamentos = () => {
                         {slot.disponivel ? "Disponível" : "Ocupado"}
                       </span>
                     </div>
+                    {!slot.disponivel && slot.agendadoPor && (
+                      <div className="text-xs mt-1 opacity-75">
+                        {slot.agendadoPor}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -241,11 +306,13 @@ const Agendamentos = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Agendamentos hoje:</span>
-                    <span className="font-semibold">8</span>
+                    <span className="font-semibold">{agendamentos.filter(ag => ag.data === new Date().toISOString().split('T')[0] && ag.status !== 'cancelado').length}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Taxa de ocupação:</span>
-                    <span className="font-semibold text-green-600">75%</span>
+                    <span className="font-semibold text-green-600">
+                      {Math.round((agendamentos.filter(ag => ag.data === new Date().toISOString().split('T')[0] && ag.status !== 'cancelado').length / 6) * 100)}%
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Professor mais ativo:</span>
