@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Calendar, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -359,5 +360,3 @@ const Agendamentos = () => {
 };
 
 export default Agendamentos;
-
-</initial_code>
