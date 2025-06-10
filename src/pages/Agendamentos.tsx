@@ -1,3 +1,4 @@
+
 import { Calendar, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,10 +57,6 @@ const Agendamentos = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Agendamentos</h1>
-          <p className="text-gray-600">Gerencie os agendamentos do laboratório</p>
-        </div>
         {canCreateAgendamento && <NovoAgendamentoModal />}
       </div>
 
