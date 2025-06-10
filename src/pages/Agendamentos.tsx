@@ -8,6 +8,10 @@ import { EditarAgendamentoModal } from "@/components/Agendamentos/EditarAgendame
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useHorarios } from "@/hooks/useHorarios";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 interface Agendamento {
   id: number;
@@ -54,8 +58,8 @@ const Agendamentos = () => {
     },
   ]);
 
-  const today = new Date();
-  const { horariosDisponiveis } = useHorarios(today, agendamentos);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const { horariosDisponiveis } = useHorarios(selectedDate, agendamentos);
 
   const [agendamentoParaEditar, setAgendamentoParaEditar] = useState<Agendamento | null>(null);
   const [modalEditarAberto, setModalEditarAberto] = useState(false);
@@ -130,16 +134,29 @@ const Agendamentos = () => {
     }
   };
 
-  const onAgendamentoCreated = () => {
+  const onAgendamentoCreated = (novoAgendamento?: Agendamento) => {
+    if (novoAgendamento) {
+      setAgendamentos(prev => [...prev, novoAgendamento]);
+    }
     console.log("Novo agendamento criado - atualizando lista");
   };
 
   const onAgendamentoUpdated = (updatedAgendamento?: Agendamento) => {
-    if (updatedAgendamento && user?.role === 'professor') {
-      createNotificationForAdmins(
-        `Professor ${user.name} editou agendamento de ${updatedAgendamento.disciplina} para ${new Date(updatedAgendamento.data).toLocaleDateString()} às ${updatedAgendamento.horario}`,
-        updatedAgendamento
+    if (updatedAgendamento) {
+      setAgendamentos(prev => 
+        prev.map(ag => 
+          ag.id === updatedAgendamento.id 
+            ? updatedAgendamento 
+            : ag
+        )
       );
+
+      if (user?.role === 'professor') {
+        createNotificationForAdmins(
+          `Professor ${user.name} editou agendamento de ${updatedAgendamento.disciplina} para ${new Date(updatedAgendamento.data).toLocaleDateString()} às ${updatedAgendamento.horario}`,
+          updatedAgendamento
+        );
+      }
     }
     console.log("Agendamento atualizado - atualizando lista");
   };
@@ -245,7 +262,35 @@ const Agendamentos = () => {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Horários Disponíveis Hoje</CardTitle>
+              <CardTitle className="text-lg flex items-center justify-between">
+                <span>Horários Disponíveis</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[140px] justify-start text-left font-normal text-xs",
+                        !selectedDate && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-3 w-3" />
+                      {selectedDate ? format(selectedDate, "dd/MM") : <span>Selecionar</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <CalendarComponent
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => date && setSelectedDate(date)}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {format(selectedDate, "dd/MM/yyyy")}
+              </p>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
@@ -314,3 +359,5 @@ const Agendamentos = () => {
 };
 
 export default Agendamentos;
+
+</initial_code>
