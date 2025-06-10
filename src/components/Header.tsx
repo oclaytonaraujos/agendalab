@@ -1,5 +1,5 @@
 
-import { Bell, User } from "lucide-react";
+import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -13,6 +13,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { NotificationPopover } from "@/components/NotificationPopover";
 
 interface HeaderProps {
   title?: string;
@@ -55,10 +56,7 @@ export const Header = ({ title = "Dashboard", description = "Bem-vindo ao sistem
       </div>
       
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="w-5 h-5" />
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-        </Button>
+        <NotificationPopover />
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
