@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +15,8 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Professores from "./pages/Professores";
 import Relatorios from "./pages/Relatorios";
+import Perfil from "./pages/Perfil";
+import Configuracoes from "./pages/Configuracoes";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +85,26 @@ const App = () => (
                 <ProtectedRoute allowedRoles={['admin', 'coordenacao']}>
                   <Layout>
                     <Relatorios />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/perfil" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Perfil />
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/configuracoes" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Configuracoes />
                   </Layout>
                 </ProtectedRoute>
               } 

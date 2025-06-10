@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   title?: string;
@@ -20,6 +21,7 @@ interface HeaderProps {
 
 export const Header = ({ title = "Dashboard", description = "Bem-vindo ao sistema de agendamento" }: HeaderProps) => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const getRoleDisplay = (role: string) => {
     switch (role) {
@@ -32,6 +34,14 @@ export const Header = ({ title = "Dashboard", description = "Bem-vindo ao sistem
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const handleProfileClick = () => {
+    navigate('/perfil');
+  };
+
+  const handleSettingsClick = () => {
+    navigate('/configuracoes');
   };
 
   return (
@@ -72,11 +82,11 @@ export const Header = ({ title = "Dashboard", description = "Bem-vindo ao sistem
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleProfileClick}>
               <User className="mr-2 h-4 w-4" />
               Perfil
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSettingsClick}>
               Configurações
             </DropdownMenuItem>
             <DropdownMenuSeparator />

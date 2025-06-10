@@ -24,6 +24,10 @@ export const Layout = ({ children }: LayoutProps) => {
         return { title: "Professores", description: "Gestão de professores e usuários" };
       case '/relatorios':
         return { title: "Relatórios", description: "Relatórios e estatísticas do sistema" };
+      case '/perfil':
+        return { title: "Perfil", description: "Gerencie suas informações pessoais" };
+      case '/configuracoes':
+        return { title: "Configurações", description: "Ajuste as configurações do sistema" };
       default:
         return { title: "Dashboard", description: "Bem-vindo ao sistema de agendamento" };
     }
