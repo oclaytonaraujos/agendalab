@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { FlaskConical, Search, Package, AlertTriangle, TrendingUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -7,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { NovoMaterialModal } from "@/components/Materiais/NovoMaterialModal";
 import { MovimentarMaterialModal } from "@/components/Materiais/MovimentarMaterialModal";
+import { EditarMaterialModal } from "@/components/Materiais/EditarMaterialModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Material {
   id: number;
@@ -19,6 +20,7 @@ interface Material {
 }
 
 const Materiais = () => {
+  const { user } = useAuth();
   const [materiais, setMateriais] = useState<Material[]>([
     {
       id: 1,
@@ -60,6 +62,11 @@ const Materiais = () => {
 
   const [materialParaMovimentar, setMaterialParaMovimentar] = useState<Material | null>(null);
   const [modalMovimentarAberto, setModalMovimentarAberto] = useState(false);
+  const [materialParaEditar, setMaterialParaEditar] = useState<Material | null>(null);
+  const [modalEditarAberto, setModalEditarAberto] = useState(false);
+
+  // Verificar se o usuário pode editar materiais
+  const canEditMaterials = user?.role === 'admin' || user?.role === 'coordenacao';
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -79,9 +86,19 @@ const Materiais = () => {
     setModalMovimentarAberto(true);
   };
 
+  const handleEditar = (material: Material) => {
+    setMaterialParaEditar(material);
+    setModalEditarAberto(true);
+  };
+
   const onMovimentacaoCreated = () => {
     // Atualizar lista de materiais
     console.log("Nova movimentação criada - atualizando lista");
+  };
+
+  const onMaterialUpdated = () => {
+    // Atualizar lista de materiais
+    console.log("Material atualizado - atualizando lista");
   };
 
   return (
@@ -197,9 +214,15 @@ const Materiais = () => {
                     >
                       Movimentar
                     </Button>
-                    <Button variant="outline" size="sm">
-                      Editar
-                    </Button>
+                    {canEditMaterials && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditar(material)}
+                      >
+                        Editar
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -213,6 +236,13 @@ const Materiais = () => {
         open={modalMovimentarAberto}
         onOpenChange={setModalMovimentarAberto}
         onMovimentacaoCreated={onMovimentacaoCreated}
+      />
+
+      <EditarMaterialModal
+        material={materialParaEditar}
+        open={modalEditarAberto}
+        onOpenChange={setModalEditarAberto}
+        onMaterialUpdated={onMaterialUpdated}
       />
     </div>
   );
