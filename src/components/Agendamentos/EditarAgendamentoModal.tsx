@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -50,7 +49,9 @@ export const EditarAgendamentoModal = ({
   const [date, setDate] = useState<Date>();
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<AgendamentoForm>();
   const { toast } = useToast();
-  const { horariosLivres } = useHorarios(date);
+  
+  // Passar uma lista vazia de agendamentos para não filtrar nenhum horário como ocupado durante a edição
+  const { horariosLivres } = useHorarios(date, []);
 
   useEffect(() => {
     if (agendamento && open) {
@@ -163,16 +164,17 @@ export const EditarAgendamentoModal = ({
                   <SelectValue placeholder="Selecione um horário" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Incluir o horário atual mesmo se não estiver disponível */}
-                  {!horariosLivres.find(h => h.horario === agendamento.horario) && (
-                    <SelectItem value={agendamento.horario}>
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-blue-600" />
-                        {agendamento.horario} (atual)
-                      </div>
-                    </SelectItem>
-                  )}
-                  {horariosLivres.map((slot) => (
+                  {/* Incluir o horário atual sempre disponível */}
+                  <SelectItem value={agendamento.horario}>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-blue-600" />
+                      {agendamento.horario} (atual)
+                    </div>
+                  </SelectItem>
+                  {/* Mostrar todos os horários disponíveis */}
+                  {horariosLivres
+                    .filter(slot => slot.horario !== agendamento.horario)
+                    .map((slot) => (
                     <SelectItem key={slot.horario} value={slot.horario}>
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-green-600" />

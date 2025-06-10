@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Calendar, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { NovoAgendamentoModal } from "@/components/Agendamentos/NovoAgendamentoM
 import { EditarAgendamentoModal } from "@/components/Agendamentos/EditarAgendamentoModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useHorarios } from "@/hooks/useHorarios";
 
 interface Agendamento {
   id: number;
@@ -23,6 +23,9 @@ interface Agendamento {
 const Agendamentos = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const today = new Date();
+  const { horariosDisponiveis } = useHorarios(today, agendamentos);
+
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([
     {
       id: 1,
@@ -55,32 +58,6 @@ const Agendamentos = () => {
 
   const [agendamentoParaEditar, setAgendamentoParaEditar] = useState<Agendamento | null>(null);
   const [modalEditarAberto, setModalEditarAberto] = useState(false);
-
-  // Calcular horários disponíveis baseado nos agendamentos não cancelados
-  const getHorariosDisponiveis = () => {
-    const todosHorarios = [
-      "06:30 - 08:10",
-      "08:00 - 09:40",
-      "10:00 - 11:40",
-      "13:00 - 14:40",
-      "14:00 - 15:40",
-      "16:00 - 17:40",
-    ];
-
-    const today = new Date().toISOString().split('T')[0];
-    const agendamentosHoje = agendamentos.filter(
-      ag => ag.data === today && ag.status !== 'cancelado'
-    );
-
-    return todosHorarios.map(horario => {
-      const ocupado = agendamentosHoje.find(ag => ag.horario === horario);
-      return {
-        horario,
-        disponivel: !ocupado,
-        agendadoPor: ocupado?.professor
-      };
-    });
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -271,7 +248,7 @@ const Agendamentos = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {getHorariosDisponiveis().map((slot, index) => (
+                {horariosDisponiveis.map((slot, index) => (
                   <div
                     key={index}
                     className={`p-3 rounded-lg border ${
