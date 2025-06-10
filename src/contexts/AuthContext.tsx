@@ -24,6 +24,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Função para validar e converter o role
+const validateRole = (role: string): 'admin' | 'coordenacao' | 'professor' => {
+  if (role === 'admin' || role === 'coordenacao' || role === 'professor') {
+    return role;
+  }
+  return 'professor'; // default fallback
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -42,7 +50,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return null;
       }
 
-      return profile;
+      // Converter o profile para o tipo UserProfile com validação
+      const userProfile: UserProfile = {
+        id: profile.id,
+        name: profile.name,
+        email: profile.email,
+        role: validateRole(profile.role),
+        departamento: profile.departamento,
+        telefone: profile.telefone,
+        status: profile.status
+      };
+
+      return userProfile;
     } catch (error) {
       console.error('Error fetching user profile:', error);
       return null;
