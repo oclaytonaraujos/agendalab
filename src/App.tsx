@@ -71,8 +71,7 @@ const App = () => (
                 <ProtectedRoute allowedRoles={['admin', 'coordenacao']}>
                   <Layout>
                     <div className="p-6">
-                      <h1 className="text-3xl font-bold">Professores</h1>
-                      <p className="text-gray-600 mt-2">Seção em desenvolvimento...</p>
+                      <p className="text-gray-600">Seção em desenvolvimento...</p>
                     </div>
                   </Layout>
                 </ProtectedRoute>
@@ -84,8 +83,7 @@ const App = () => (
                 <ProtectedRoute allowedRoles={['admin', 'coordenacao']}>
                   <Layout>
                     <div className="p-6">
-                      <h1 className="text-3xl font-bold">Relatórios</h1>
-                      <p className="text-gray-600 mt-2">Seção em desenvolvimento...</p>
+                      <p className="text-gray-600">Seção em desenvolvimento...</p>
                     </div>
                   </Layout>
                 </ProtectedRoute>
