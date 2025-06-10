@@ -1,12 +1,25 @@
+
+import { useState } from "react";
 import { FlaskConical, Search, Package, AlertTriangle, TrendingUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { NovoMaterialModal } from "@/components/Materiais/NovoMaterialModal";
+import { MovimentarMaterialModal } from "@/components/Materiais/MovimentarMaterialModal";
+
+interface Material {
+  id: number;
+  nome: string;
+  categoria: string;
+  estoque: number;
+  minimo: number;
+  localizacao: string;
+  status: string;
+}
 
 const Materiais = () => {
-  const materiais = [
+  const [materiais, setMateriais] = useState<Material[]>([
     {
       id: 1,
       nome: "Tubos de Ensaio",
@@ -43,7 +56,10 @@ const Materiais = () => {
       localizacao: "Gaveta B2",
       status: "baixo",
     },
-  ];
+  ]);
+
+  const [materialParaMovimentar, setMaterialParaMovimentar] = useState<Material | null>(null);
+  const [modalMovimentarAberto, setModalMovimentarAberto] = useState(false);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -56,6 +72,16 @@ const Materiais = () => {
       default:
         return <Badge className="bg-gray-100 text-gray-800">-</Badge>;
     }
+  };
+
+  const handleMovimentar = (material: Material) => {
+    setMaterialParaMovimentar(material);
+    setModalMovimentarAberto(true);
+  };
+
+  const onMovimentacaoCreated = () => {
+    // Atualizar lista de materiais
+    console.log("Nova movimentação criada - atualizando lista");
   };
 
   return (
@@ -164,7 +190,11 @@ const Materiais = () => {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleMovimentar(material)}
+                    >
                       Movimentar
                     </Button>
                     <Button variant="outline" size="sm">
@@ -177,6 +207,13 @@ const Materiais = () => {
           </div>
         </CardContent>
       </Card>
+
+      <MovimentarMaterialModal
+        material={materialParaMovimentar}
+        open={modalMovimentarAberto}
+        onOpenChange={setModalMovimentarAberto}
+        onMovimentacaoCreated={onMovimentacaoCreated}
+      />
     </div>
   );
 };

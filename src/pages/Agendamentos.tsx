@@ -1,15 +1,28 @@
-
+import { useState } from "react";
 import { Calendar, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NovoAgendamentoModal } from "@/components/Agendamentos/NovoAgendamentoModal";
+import { EditarAgendamentoModal } from "@/components/Agendamentos/EditarAgendamentoModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+
+interface Agendamento {
+  id: number;
+  data: string;
+  horario: string;
+  professor: string;
+  disciplina: string;
+  turma: string;
+  status: string;
+  observacoes?: string;
+}
 
 const Agendamentos = () => {
   const { user } = useAuth();
-  
-  const agendamentos = [
+  const { toast } = useToast();
+  const [agendamentos, setAgendamentos] = useState<Agendamento[]>([
     {
       id: 1,
       data: "2024-06-10",
@@ -37,7 +50,10 @@ const Agendamentos = () => {
       turma: "1º C",
       status: "confirmado",
     },
-  ];
+  ]);
+
+  const [agendamentoParaEditar, setAgendamentoParaEditar] = useState<Agendamento | null>(null);
+  const [modalEditarAberto, setModalEditarAberto] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -55,10 +71,47 @@ const Agendamentos = () => {
   const canManageAgendamentos = user?.role === 'admin' || user?.role === 'coordenacao';
   const canCreateAgendamento = true; // Todos podem criar agendamentos
 
+  const handleEditarAgendamento = (agendamento: Agendamento) => {
+    setAgendamentoParaEditar(agendamento);
+    setModalEditarAberto(true);
+  };
+
+  const handleCancelarAgendamento = async (agendamento: Agendamento) => {
+    if (!canManageAgendamentos) return;
+
+    if (window.confirm(`Tem certeza que deseja cancelar o agendamento de ${agendamento.professor}?`)) {
+      // Simular cancelamento
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setAgendamentos(prev => 
+        prev.map(ag => 
+          ag.id === agendamento.id 
+            ? { ...ag, status: 'cancelado' }
+            : ag
+        )
+      );
+
+      toast({
+        title: "Agendamento cancelado",
+        description: `O agendamento de ${agendamento.professor} foi cancelado com sucesso.`,
+      });
+    }
+  };
+
+  const onAgendamentoCreated = () => {
+    // Atualizar lista de agendamentos
+    console.log("Novo agendamento criado - atualizando lista");
+  };
+
+  const onAgendamentoUpdated = () => {
+    // Atualizar lista de agendamentos
+    console.log("Agendamento atualizado - atualizando lista");
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        {canCreateAgendamento && <NovoAgendamentoModal />}
+        {canCreateAgendamento && <NovoAgendamentoModal onAgendamentoCreated={onAgendamentoCreated} />}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
@@ -114,14 +167,24 @@ const Agendamentos = () => {
                       </div>
                       <div className="flex gap-2">
                         {/* Professores podem apenas editar seus próprios agendamentos */}
-                        {(canManageAgendamentos || (user?.role === 'professor' && agendamento.professor.includes(user.name))) && (
-                          <Button variant="outline" size="sm">
+                        {(canManageAgendamentos || (user?.role === 'professor' && agendamento.professor.includes(user.name))) && 
+                         agendamento.status !== 'cancelado' && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditarAgendamento(agendamento)}
+                          >
                             Editar
                           </Button>
                         )}
                         {/* Apenas admin e coordenacao podem cancelar qualquer agendamento */}
-                        {canManageAgendamentos && (
-                          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                        {canManageAgendamentos && agendamento.status !== 'cancelado' && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => handleCancelarAgendamento(agendamento)}
+                          >
                             Cancelar
                           </Button>
                         )}
@@ -194,6 +257,13 @@ const Agendamentos = () => {
           )}
         </div>
       </div>
+
+      <EditarAgendamentoModal
+        agendamento={agendamentoParaEditar}
+        open={modalEditarAberto}
+        onOpenChange={setModalEditarAberto}
+        onAgendamentoUpdated={onAgendamentoUpdated}
+      />
     </div>
   );
 };
