@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -25,7 +25,17 @@ const Login = () => {
         title: "Login realizado com sucesso!",
         description: "Bem-vindo ao sistema de agendamento.",
       });
-      navigate('/');
+      
+      // Redirecionar com base no role do usuário
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        const userData = JSON.parse(savedUser);
+        if (userData.role === 'professor') {
+          navigate('/agendamentos');
+        } else {
+          navigate('/');
+        }
+      }
     } else {
       toast({
         title: "Erro no login",
