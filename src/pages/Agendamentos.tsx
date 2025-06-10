@@ -1,4 +1,5 @@
 
+
 import { useState } from "react";
 import { Calendar, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,24 @@ const Agendamentos = () => {
       turma: "1º C",
       status: "confirmado",
     },
+    {
+      id: 4,
+      data: "2024-06-11",
+      horario: "08:00 - 09:40",
+      professor: "Prof. Carlos Lima",
+      disciplina: "Matemática",
+      turma: "2º A",
+      status: "confirmado",
+    },
+    {
+      id: 5,
+      data: "2024-06-11",
+      horario: "14:00 - 15:40",
+      professor: "Prof. Maria Silva",
+      disciplina: "Química",
+      turma: "1º B",
+      status: "pendente",
+    },
   ]);
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -64,6 +83,13 @@ const Agendamentos = () => {
 
   const [agendamentoParaEditar, setAgendamentoParaEditar] = useState<Agendamento | null>(null);
   const [modalEditarAberto, setModalEditarAberto] = useState(false);
+
+  // Filtrar agendamentos pela data selecionada
+  const agendamentosFiltrados = agendamentos.filter(agendamento => {
+    const agendamentoDate = new Date(agendamento.data);
+    const selectedDateString = selectedDate.toISOString().split('T')[0];
+    return agendamento.data === selectedDateString;
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -200,61 +226,67 @@ const Agendamentos = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-blue-600" />
-                Lista de Agendamentos
+                Lista de Agendamentos - {format(selectedDate, "dd/MM/yyyy")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {agendamentos.map((agendamento) => (
-                  <div
-                    key={agendamento.id}
-                    className="p-4 border border-gray-200 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-gray-900">
-                            {agendamento.professor}
-                          </h3>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                              agendamento.status
-                            )}`}
-                          >
-                            {agendamento.status}
-                          </span>
+                {agendamentosFiltrados.length > 0 ? (
+                  agendamentosFiltrados.map((agendamento) => (
+                    <div
+                      key={agendamento.id}
+                      className="p-4 border border-gray-200 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold text-gray-900">
+                              {agendamento.professor}
+                            </h3>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                agendamento.status
+                              )}`}
+                            >
+                              {agendamento.status}
+                            </span>
+                          </div>
+                          <p className="text-gray-600">
+                            <strong>{agendamento.disciplina}</strong> - {agendamento.turma}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {new Date(agendamento.data).toLocaleDateString()} • {agendamento.horario}
+                          </p>
                         </div>
-                        <p className="text-gray-600">
-                          <strong>{agendamento.disciplina}</strong> - {agendamento.turma}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {new Date(agendamento.data).toLocaleDateString()} • {agendamento.horario}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        {canEditAgendamento(agendamento) && agendamento.status !== 'cancelado' && (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleEditarAgendamento(agendamento)}
-                          >
-                            Editar
-                          </Button>
-                        )}
-                        {canCancelAgendamento(agendamento) && agendamento.status !== 'cancelado' && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => handleCancelarAgendamento(agendamento)}
-                          >
-                            Cancelar
-                          </Button>
-                        )}
+                        <div className="flex gap-2">
+                          {canEditAgendamento(agendamento) && agendamento.status !== 'cancelado' && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditarAgendamento(agendamento)}
+                            >
+                              Editar
+                            </Button>
+                          )}
+                          {canCancelAgendamento(agendamento) && agendamento.status !== 'cancelado' && (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => handleCancelarAgendamento(agendamento)}
+                            >
+                              Cancelar
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    Nenhum agendamento encontrado para {format(selectedDate, "dd/MM/yyyy")}
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
@@ -360,3 +392,4 @@ const Agendamentos = () => {
 };
 
 export default Agendamentos;
+
